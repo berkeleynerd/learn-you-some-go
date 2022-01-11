@@ -29,6 +29,10 @@ func (d Dictionary) Add(word, definition string) error {
     return nil
 }
 
+func (d Dictionary) Delete(word string) {
+    delete(d, word)
+}
+
 func (d Dictionary) Search(word string) (string, error) {
     definition, ok := d[word]
     if !ok {
