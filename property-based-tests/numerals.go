@@ -9,7 +9,7 @@ type Numeral struct {
 	Symbol string
 }
 
-var allNumerals = []Numeral{
+var allNumerals = Numerals{
 	{1000, "M"},
 	{900, "CM"},
 	{500, "D"},
@@ -39,10 +39,47 @@ func ConvertToRoman(arabic int) string {
 	return result.String()
 }
 
+type Numerals []Numeral
+
+func (r Numerals) ValueOf(symbol string) int {
+	for _, s := range r {
+		if s.Symbol == symbol {
+			return s.Value
+		}
+	}
+
+	return 0
+}
+
 func ConvertToArabic(roman string) int {
 	total := 0
-	for range roman {
-		total++
+
+	for i := 0; i < len(roman); i++ {
+		symbol := roman[i]
+
+		if couldBeSubtractive(i, symbol, roman) {
+			nextSymbol := roman[i+1]
+
+			// build the two character string
+			potentialNumber := string([]byte{symbol, nextSymbol})
+
+			// get the value of the two character string
+			value := allNumerals.ValueOf(potentialNumber)
+
+			if value != 0 {
+				total += value
+				i++ // move past this character too for the next loop
+			} else {
+				total++
+			}
+		} else {
+			total++
+		}
 	}
 	return total
+}
+
+// look ahead to next symbol if we can and the current symbol is base 10 (i.e., only valid subtractors ...)
+func couldBeSubtractive(index int, currentSymbol uint8, roman string) bool {
+	return index+1 < len(roman) && currentSymbol == 'I'
 }
